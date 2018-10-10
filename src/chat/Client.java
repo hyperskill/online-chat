@@ -1,7 +1,7 @@
 package chat;
 
-public class Main {
+public class Client {
     public static void main(String[] args) {
-        System.out.print("Hello world!");
+        System.out.print("Client started!");
     }
 }
