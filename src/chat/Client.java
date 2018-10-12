@@ -14,14 +14,14 @@ public class Client {
     private final static int CHAT_SERVER_PORT = 23456;
 
     public static void main(String[] args) {
-        try (final Socket socket = new Socket(InetAddress.getByName(CHAT_SERVER_ADDRESS), CHAT_SERVER_PORT)) {
+        try (final Socket socket = new Socket(InetAddress.getByName("localhost"), CHAT_SERVER_PORT)) {
             final DataOutputStream output = new DataOutputStream(socket.getOutputStream());
             output.writeUTF("Hello from Client!");
             final DataInputStream input = new DataInputStream(socket.getInputStream());
             final String msg = input.readUTF();
             System.out.println(msg);
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, String.format("Cannot interact with server on %s:%d", CHAT_SERVER_ADDRESS, CHAT_SERVER_PORT));
+            LOGGER.log(Level.SEVERE, String.format("Cannot interact with server on %s:%d", CHAT_SERVER_ADDRESS, CHAT_SERVER_PORT), e);
         }
     }
 }
