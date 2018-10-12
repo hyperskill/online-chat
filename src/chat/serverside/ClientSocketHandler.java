@@ -27,11 +27,6 @@ public class ClientSocketHandler extends Thread {
     @Override
     public void run() {
         try {
-            Thread.sleep(2000L);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        try {
             while (true) {
                 final String receivedMsg = input.readUTF();
                 if (receivedMsg.trim().equalsIgnoreCase("exit")) {
