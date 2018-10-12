@@ -13,7 +13,7 @@ public class Client {
     private final static String CHAT_SERVER_ADDRESS = "127.0.0.1";
     private final static int CHAT_SERVER_PORT = 23456;
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         try {
             final Socket socket = new Socket(InetAddress.getByName(CHAT_SERVER_ADDRESS), CHAT_SERVER_PORT);
             final DataInputStream input = new DataInputStream(socket.getInputStream());
