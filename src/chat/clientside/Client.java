@@ -7,6 +7,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.time.LocalDateTime;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -33,7 +34,8 @@ public class Client {
                 try {
                     while (true) {
                         final String msg = input.readUTF();
-                        System.out.println(msg);
+                        final LocalDateTime now = LocalDateTime.now().withNano(0);
+                        System.out.println(String.format("[%s] %s", now.toString(), msg));
                     }
                 } catch(IOException e){
                     LOGGER.log(Level.SEVERE, "Cannot interact with the server");
