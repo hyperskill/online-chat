@@ -1,4 +1,4 @@
-package chat;
+package chat.serverside;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -31,8 +31,8 @@ public class ClientSocketHandler extends Thread {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        while (true) {
-            try {
+        try {
+            while (true) {
                 final String receivedMsg = input.readUTF();
                 if (receivedMsg.trim().equalsIgnoreCase("exit")) {
                     disconnect();
@@ -45,9 +45,10 @@ public class ClientSocketHandler extends Thread {
                 wordsCounter += words.length;
 
                 output.writeUTF(String.format("You sent %d words total", wordsCounter));
-            } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, String.format("Cannot interact with %s", clientName));
             }
+        } catch(IOException e){
+            LOGGER.log(Level.SEVERE, String.format("Cannot interact with %s", clientName));
+            disconnect();
         }
     }
 

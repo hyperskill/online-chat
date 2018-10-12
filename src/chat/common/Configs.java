@@ -1,4 +1,4 @@
-package chat;
+package chat.common;
 
 public final class Configs {
 

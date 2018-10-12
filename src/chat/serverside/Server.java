@@ -1,4 +1,6 @@
-package chat;
+package chat.serverside;
+
+import chat.common.Configs;
 
 import java.io.IOException;
 import java.net.ServerSocket;
