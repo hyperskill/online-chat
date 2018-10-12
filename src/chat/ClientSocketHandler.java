@@ -39,7 +39,7 @@ public class ClientSocketHandler extends Thread {
                     break;
                 }
 
-                System.out.println(clientName + ":" + receivedMsg);
+                System.out.println(clientName + ": " + receivedMsg);
 
                 final String[] words = receivedMsg.split("\\s+");
                 wordsCounter += words.length;
@@ -56,7 +56,7 @@ public class ClientSocketHandler extends Thread {
             clientSocket.close();
             input.close();
             output.close();
-            System.out.printf("%s disconnected\n", clientName);
+            System.out.printf("%s disconnected from the server\n", clientName);
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, String.format("Cannot disconnect %s", clientName));
         }

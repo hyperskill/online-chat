@@ -4,6 +4,6 @@ public final class Configs {
 
     private Configs() { }
 
-    public static final int CHAR_SERVER_PORT = 23456;
-    public static final String CHAR_SERVER_ADDRESS = "127.0.0.1";
+    public static final int CHAT_SERVER_PORT = 23456;
+    public static final String CHAT_SERVER_ADDRESS = "127.0.0.1";
 }
