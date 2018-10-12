@@ -35,7 +35,7 @@ public class Client {
                     while (true) {
                         final String msg = input.readUTF();
                         final LocalDateTime now = LocalDateTime.now().withNano(0);
-                        System.out.println(String.format("[%s] %s", now.toString(), msg));
+                        System.out.println(String.format("[%s] %s", now.toString().replace('T', ' '), msg));
                     }
                 } catch(IOException e){
                     LOGGER.log(Level.SEVERE, "Cannot interact with the server");
