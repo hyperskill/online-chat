@@ -32,6 +32,7 @@ public class ClientHandler extends Thread {
 
     public void sendMsg(String msg) throws IOException {
         output.writeUTF(msg);
+        output.flush();
     }
 
     @Override
