@@ -1,5 +1,6 @@
 package chat.clientside;
 
+import chat.common.Commands;
 import chat.common.Configs;
 
 import java.io.DataInputStream;
@@ -50,7 +51,7 @@ public class Client {
                 final String msgToSend = scanner.nextLine();
                 output.writeUTF(msgToSend);
 
-                if (msgToSend.trim().equalsIgnoreCase("/exit")) {
+                if (msgToSend.trim().equalsIgnoreCase(Commands.EXIT.getCode())) {
                     break;
                 }
             }

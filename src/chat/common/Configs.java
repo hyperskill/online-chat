@@ -6,4 +6,5 @@ public final class Configs {
 
     public static final int CHAT_SERVER_PORT = 23456;
     public static final String CHAT_SERVER_ADDRESS = "127.0.0.1";
+    public static final int THREAD_POOL_SIZE = 1;
 }

@@ -6,6 +6,10 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,12 +39,16 @@ public class Server {
 
     public synchronized void regNewClient(Socket client) {
         try {
-            final ClientHandler clientThread = new ClientHandler(this, client);
+            final ClientHandler clientThread = new ClientHandler(UUID.randomUUID(), this, client);
             clientThread.start();
             handlers.add(clientThread);
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Cannot register a new client", e);
         }
+    }
+
+    public synchronized void dropClient(UUID clientId) {
+        handlers.removeIf(client -> Objects.equals(client.getClientId(), clientId));
     }
 
     public synchronized void broadcastMessage(String msg) {
