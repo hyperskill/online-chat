@@ -1,34 +1,36 @@
 package chat;
 
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.sql.Time;
+
 
 public class Server {
+
+
     public static void main(String[] args) throws IOException {
-        System.out.println("Server started!");
 
-        String address = "127.0.0.1";
-        int port = 9103;
-        int port2 = 9104;
+            ServerSocket server = new ServerSocket(Configs.port, 50, InetAddress.getByName(Configs.adress));
 
-        ServerSocket server = new ServerSocket(port, 50,  InetAddress.getByName(address));
-        Socket socket = server.accept();
-        ServerSocket serverSocket = new ServerSocket(port2,50, InetAddress.getByName(address));
-        Socket socket1 = serverSocket.accept();
+            while (true){
+                autorize(server);
 
-            ServerThread thread = new ServerThread(socket);
+            }
+        }
 
-        ServerThread thread1 = new ServerThread(socket1);
+        static  void autorize(ServerSocket server) throws IOException {
+
+        final Socket socket = server.accept();
+        Thread thread = new ClientSocketThread(socket);
 
         thread.start();
 
-        thread1.start();
-
+        }
 
     }
-}
+
+
 
 
