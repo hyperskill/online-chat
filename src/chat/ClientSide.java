@@ -3,31 +3,29 @@ package chat;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.Socket;
+import java.util.Scanner;
 
+public class ClientSide extends Thread {
+    Scanner scanner;
+    DataOutputStream output;
+    DataInputStream input;
 
-public interface ClientSide {
-
-    public static  void hello(Socket socket) throws IOException {
-
-        DataInputStream input = new DataInputStream(socket.getInputStream());
-        System.out.println(input.readUTF());
-
+    ClientSide(Scanner in, DataOutputStream output, DataInputStream input){
+        this.input = input;
+        this.scanner = in;
+        this.output = output;
     }
-    public static void outcome(Socket socket, String message) throws IOException {
+    @Override
+    public void run(){
+        while (true){
+            String ans = null;
+            try {
+                ans = input.readUTF();
+                System.out.println(ans);
+            } catch (IOException e) {
+                break;
+            }
+        }
 
-        DataOutputStream output = new DataOutputStream(socket.getOutputStream());
-        System.out.println("Type message: " + message);
-        output.writeUTF(message);
-    }
-    public static  void  income (Socket socket) throws IOException{
-
-
-        DataInputStream input = new DataInputStream(socket.getInputStream());
-
-
-
-        String income = input.readUTF();
-        System.out.println(income);
     }
 }
