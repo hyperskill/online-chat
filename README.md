@@ -1,5 +1,5 @@
-# Online chat
+# Online Chat
 
-Project: Online chat
+Project: Online Chat
 
 Go to the *src* directory, change *Client.java*, *Server.java* and put your *.java* file(s) in it.
