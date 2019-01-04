@@ -33,9 +33,14 @@ public class Server {
     private static String serverHello(Connection connection) throws IOException, ClassNotFoundException {
         while (true) {
             Message in = connection.receive();
-            if(in.getType() == MessageType.HELLO){
-                String clientName = in.getData();
-                connection.send(new Message(MessageType.TEXT,"Hello from Server, "+in.getData()+"!"));
+            String clientName = in.getData();
+            if(clients.containsKey(clientName)){
+                connection.send(new Message(MessageType.TEXT,"Server: This name is in use! Choose another one: "));
+                continue;
+            }
+            if(in.getType() == MessageType.HELLO ){
+                clients.put(clientName,connection);
+                connection.send(new Message(MessageType.VALID_NAME,"Hello from Server, "+clientName+"!"));
                 Helper.write(clientName+ " connected.");
                 return clientName;
             }
@@ -50,16 +55,17 @@ public class Server {
                 continue;
 
             }
-            String text = in.getData();
-            Helper.write(clientName+" typed: "+text);
-            if(text.equals("exit")){
+            if(in.getData().equals("exit")){
                 Helper.write(clientName+ " disconnected.");
+                clients.remove(clientName);
                 break;
             }
-            connection.send(new Message(MessageType.TEXT,"Words in message "+text.split("\\s+").length));
+            String text = clientName+": "+in.getData();
+            for(Map.Entry<String,Connection> pair : clients.entrySet()){
+                pair.getValue().send(new Message(MessageType.TEXT,text));
 
+            }
         }
-
     }
 
     public static void main(String[] args) throws Exception {

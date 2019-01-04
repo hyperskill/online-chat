@@ -1,5 +1,5 @@
 package chat;
 
 public enum MessageType {
-    HELLO,TEXT
+    HELLO,TEXT,VALID_NAME
 }

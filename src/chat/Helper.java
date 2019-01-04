@@ -10,7 +10,9 @@ public class Helper {
         System.out.println(msg);
     }
 
+
     public static String read() {
+        System.out.print("> ");
         return scanner.nextLine();
     }
 
