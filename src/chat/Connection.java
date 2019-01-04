@@ -18,16 +18,16 @@ public class Connection implements Closeable {
         in = new ObjectInputStream(socket.getInputStream());
     }
 
-    public void send(String message) throws IOException {
+    public void send(Message message) throws IOException {
         synchronized (out) {
-            out.writeUTF(message);
+            out.writeObject(message);
             out.flush();
         }
     }
 
-    public String receive() throws IOException, ClassNotFoundException {
+    public Message receive() throws IOException, ClassNotFoundException {
         synchronized (in) {
-            return in.readUTF();
+            return (Message)in.readObject();
         }
     }
 
