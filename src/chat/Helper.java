@@ -12,7 +12,6 @@ public class Helper {
 
 
     public static String read() {
-        System.out.print("> ");
         return scanner.nextLine();
     }
 

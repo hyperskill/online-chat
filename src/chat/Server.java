@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Server {
     private static Map<String, Connection> clients = new ConcurrentHashMap<>();
+
     private static class Handler extends Thread {
         private Socket socket;
 
@@ -21,8 +22,8 @@ public class Server {
         @Override
         public void run() {
             try (Connection connection = new Connection(socket)) {
-             String clientName = serverHello(connection);
-             dialogServer(clientName,connection);
+                String clientName = serverHello(connection);
+                dialogServer(clientName, connection);
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
@@ -34,37 +35,39 @@ public class Server {
         while (true) {
             Message in = connection.receive();
             String clientName = in.getData();
-            if(clients.containsKey(clientName)){
-                connection.send(new Message(MessageType.TEXT,"Server: This name is in use! Choose another one: "));
+            if (clients.containsKey(clientName)) {
+                connection.send(new Message(MessageType.TEXT, "Server: This name is in use! Choose another one: "));
                 continue;
             }
-            if(in.getType() == MessageType.HELLO ){
-                clients.put(clientName,connection);
-                connection.send(new Message(MessageType.VALID_NAME,"Hello from Server, "+clientName+"!"));
-                Helper.write(clientName+ " connected.");
+            if (in.getType() == MessageType.HELLO) {
+                clients.put(clientName, connection);
+                connection.send(new Message(MessageType.VALID_NAME, "Hello from Server, " + clientName + "!"));
+                Helper.write(clientName + " connected.");
                 return clientName;
             }
         }
     }
 
-    private static void dialogServer(String clientName,Connection connection) throws IOException, ClassNotFoundException{
-        while (true){
+    private static void dialogServer(String clientName, Connection connection) throws IOException, ClassNotFoundException {
+        while (true) {
             Message in = connection.receive();
-            if(in.getType() != MessageType.TEXT){
+            if (in.getType() != MessageType.TEXT) {
                 Helper.write("Not a text!");
                 continue;
-
             }
-            if(in.getData().equals("exit")){
-                Helper.write(clientName+ " disconnected.");
+            String text;
+            if (in.getData().equals("exit")) {
+                text = clientName + " disconnected.";
+                Helper.write(text);
                 clients.remove(clientName);
-                break;
+            } else {
+                text = clientName + ": " + in.getData();
             }
-            String text = clientName+": "+in.getData();
-            for(Map.Entry<String,Connection> pair : clients.entrySet()){
-                pair.getValue().send(new Message(MessageType.TEXT,text));
+            for (Map.Entry<String, Connection> pair : clients.entrySet()) {
+                pair.getValue().send(new Message(MessageType.TEXT, text));
 
             }
+
         }
     }
 
