@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-
 public class Server {
     private static Map<String, Connection> clients = new ConcurrentHashMap<>();
 
@@ -49,23 +48,37 @@ public class Server {
         }
     }
 
-    private static void dialogServer(String clientName, Connection connection) throws IOException, ClassNotFoundException{
+    private static void dialogServer(String clientName, Connection connection) throws IOException, ClassNotFoundException {
         boolean stopped = false;
         while (!stopped) {
             Message in = connection.receive();
             String text;
-            if (in.getData().equals("exit")) {
-                text = clientName + " disconnected.";
-                Helper.write(text);
-                clients.remove(clientName);
-                stopped = true;
-            } else {
-                text = clientName + ": " + in.getData();
-            }
-            for (Map.Entry<String, Connection> pair : clients.entrySet()) {
-                pair.getValue().send(new Message(MessageType.TEXT, text));
+            switch (in.getData()) {
+                case "/list":
+                    text = clients.keySet().toString();
+                    connection.send(new Message(MessageType.TEXT, text));
+                    break;
+                case "/exit": {
+                    text = clientName + " disconnected.";
+                    Helper.write(text);
+                    clients.remove(clientName);
+                    stopped = true;
+                    for (Map.Entry<String, Connection> pair : clients.entrySet()) {
+                        pair.getValue().send(new Message(MessageType.TEXT, text));
+
+                    }
+                }
+                break;
+                default:
+                    text = clientName + ": " + in.getData();
+                    for (Map.Entry<String, Connection> pair : clients.entrySet()) {
+                        pair.getValue().send(new Message(MessageType.TEXT, text));
+
+                    }
 
             }
+
+
 
         }
     }

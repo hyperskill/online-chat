@@ -31,8 +31,6 @@ public class Client {
                     e.printStackTrace();
                 }
             }
-
-
         }
     }
 
@@ -47,7 +45,7 @@ public class Client {
             while (true) {
                 String msg = Helper.read();
                 connection.send(new Message(MessageType.TEXT, msg));
-                if (msg.equals("exit")) {
+                if (msg.equals("/exit")) {
                     clientHelper.setStopped(true);
                     break;
                 }
