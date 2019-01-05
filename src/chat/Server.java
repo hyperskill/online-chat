@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 
+
 public class Server {
     private static Map<String, Connection> clients = new ConcurrentHashMap<>();
 
@@ -48,18 +49,16 @@ public class Server {
         }
     }
 
-    private static void dialogServer(String clientName, Connection connection) throws IOException, ClassNotFoundException {
-        while (true) {
+    private static void dialogServer(String clientName, Connection connection) throws IOException, ClassNotFoundException{
+        boolean stopped = false;
+        while (!stopped) {
             Message in = connection.receive();
-            if (in.getType() != MessageType.TEXT) {
-                Helper.write("Not a text!");
-                continue;
-            }
             String text;
             if (in.getData().equals("exit")) {
                 text = clientName + " disconnected.";
                 Helper.write(text);
                 clients.remove(clientName);
+                stopped = true;
             } else {
                 text = clientName + ": " + in.getData();
             }

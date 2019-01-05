@@ -10,23 +10,24 @@ public class Client {
 
     private static class ClientHelper extends Thread {
         private Connection connection;
-
+        private boolean stopped = false;
 
         public ClientHelper(Connection connection) {
             this.connection = connection;
         }
 
+        public void setStopped(boolean stopped) {
+            this.stopped = stopped;
+        }
+
         @Override
         public void run() {
-            while (true) {
+            while (!stopped) {
                 try {
-                    String msg = Helper.read();
-                    connection.send(new Message(MessageType.TEXT, msg));
-                    if (msg.equals("exit")) {
-                        break;
-                    }
+                    Message in = connection.receive();
+                    Helper.write(in.getData());
 
-                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -38,13 +39,21 @@ public class Client {
     public static void main(String[] args) throws Exception {
         Helper.write("Client started!");
         Socket socket = new Socket(InetAddress.getByName(Helper.getAddress()), Helper.getPort());
-        Connection connection = new Connection(socket);
-        clientHello(connection);
-        ClientHelper clientHelper = new ClientHelper(connection);
-        clientHelper.start();
-        while (true) {
-            Message in = connection.receive();
-            Helper.write(in.getData());
+        try(Connection connection = new Connection(socket)){
+            clientHello(connection);
+            ClientHelper clientHelper = new ClientHelper(connection);
+            clientHelper.setDaemon(true);
+            clientHelper.start();
+            while (true) {
+                String msg = Helper.read();
+                connection.send(new Message(MessageType.TEXT, msg));
+                if (msg.equals("exit")) {
+                    clientHelper.setStopped(true);
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
