@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Server {
     private static Map<String, Connection> clients = new ConcurrentHashMap<>();
+    private static Map<String, Integer> registration = new ConcurrentHashMap<>();
 
     private static class Handler extends Thread {
         private Socket socket;
@@ -34,16 +35,41 @@ public class Server {
     private static String serverHello(Connection connection) throws IOException, ClassNotFoundException {
         while (true) {
             Message in = connection.receive();
-            String clientName = in.getData();
-            if (clients.containsKey(clientName)) {
-                connection.send(new Message(MessageType.TEXT, "Server: This name is in use! Choose another one: "));
-                continue;
-            }
-            if (in.getType() == MessageType.HELLO) {
-                clients.put(clientName, connection);
-                connection.send(new Message(MessageType.VALID_NAME, "Hello from Server, " + clientName + "!"));
-                Helper.write(clientName + " connected.");
-                return clientName;
+            String request = in.getData();
+            String[] requestWords = request.split(" ");
+            if (request.startsWith("/reg") && requestWords.length == 3) {
+                String clientName = requestWords[1];
+                String password = requestWords[2];
+                if (registration.containsKey(clientName)) {
+                    connection.send(new Message(MessageType.TEXT, "Server: you have already authorized"));
+                } else{
+                    if (password.length() < 8) {
+                        connection.send(new Message(MessageType.TEXT, "Server: password too short"));
+                        continue;
+                    }
+                    clients.put(clientName, connection);
+                    registration.put(clientName, password.hashCode());
+                    connection.send(new Message(MessageType.VALID_NAME,"Server: you are registered successfully" ));
+                    Helper.write(clientName + " connected.");
+                    return clientName;
+                }
+            } else if (request.startsWith("/auth")&& requestWords.length == 3) {
+                String clientName = requestWords[1];
+                String password = requestWords[2];
+                if (registration.containsKey(clientName)) {
+                    if(password.hashCode() != registration.get(clientName)){
+                        connection.send(new Message(MessageType.TEXT, "Server: password wrong"));
+                        continue;
+                    }
+                    clients.put(clientName, connection);
+                    connection.send(new Message(MessageType.VALID_NAME, "Server: you are authorized successfully"));
+                    Helper.write(clientName + " connected.");
+                    return clientName;
+                } else  {
+                    connection.send(new Message(MessageType.TEXT,"Server: you are not registered"));
+                }
+            }else{
+                connection.send(new Message(MessageType.TEXT, "Server: please start with (/auth or /reg) name pass"));
             }
         }
     }
@@ -77,7 +103,6 @@ public class Server {
                     }
 
             }
-
 
 
         }

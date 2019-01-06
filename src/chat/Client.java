@@ -58,7 +58,7 @@ public class Client {
     private static void clientHello(Connection connection) {
         while (true) {
             try {
-                Helper.write("Server: write your name: ");
+                Helper.write("Server: authorize or register");
                 String name = Helper.read();
                 connection.send(new Message(MessageType.HELLO, name));
                 Message message = connection.receive();
