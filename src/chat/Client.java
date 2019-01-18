@@ -3,6 +3,7 @@ package chat;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Scanner;
@@ -14,7 +15,6 @@ public class Client {
 
         String address = "127.0.0.1";
         Scanner sc = new Scanner(System.in);
-        int count = -1;
 
         int port = 12345;
         Socket socket = new Socket(InetAddress.getByName(address), port);
@@ -24,16 +24,52 @@ public class Client {
         System.out.println(dis.readUTF());
 
         String str;
-        while (true) {
-            System.out.print("Type message: ");
+        //Nick picking
+        while (true){
             str = sc.nextLine();
-            count += str.split("\\s+").length;
-            if (str.equals("exit")) {
+            dos.writeUTF(str);
+
+           str = dis.readUTF();
+            if (str.equals("run"))
+                break;
+            System.out.println(str);
+        }
+        str = dis.readUTF();
+        System.out.print(str);
+        readBuffer rd = new readBuffer(socket);
+        rd.start();
+        while (true) {
+            str = sc.nextLine();
+            if (str.equals("/exit")) {
+                rd.alive = false;
                 dos.writeUTF(str);
+                rd.join();
                 break;
             }
             dos.writeUTF(str);
-            str = dis.readUTF();
+        }
+    }
+}
+
+class readBuffer extends Thread{
+    DataInputStream dis;
+    DataOutputStream dos;
+    boolean alive = true;
+
+    readBuffer(Socket socket) throws IOException {
+        this.dis = new DataInputStream(socket.getInputStream());
+        this.dos = new DataOutputStream(socket.getOutputStream());
+    }
+
+    @Override
+    public void run(){
+        String str = "";
+        while (alive){
+            try {
+                str = dis.readUTF();
+            } catch (IOException e) {
+                break;
+            }
             System.out.println(str);
         }
     }

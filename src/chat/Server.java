@@ -3,10 +3,12 @@ package chat;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.ArrayList;
 
 public class Server {
     public static void main(String[] args) throws Exception {
@@ -15,11 +17,13 @@ public class Server {
         String address = "127.0.0.1";
         int port = 12345;
         ServerSocket ss = new ServerSocket(port, 50, InetAddress.getByName(address));
+        DataBase db = new DataBase();
 
         while (true) {
             Socket socket = ss.accept();
-            Cloent cl = new Cloent(socket, Clients);
+            Cloent cl = new Cloent(socket, Clients, db);
             cl.start();
+            db.addClient(cl);
             Clients++;
         }
 
@@ -32,23 +36,63 @@ class Cloent extends Thread{
     DataInputStream dis;
     DataOutputStream dos;
     Socket socket;
+    DataBase db;
     int count = -1;
+    int nbOfMsg = 10;//how many words get at enter chat
 
-    Cloent(Socket socket, int cleintsNb) throws IOException {
+
+    Cloent(Socket socket, int cleintsNb, DataBase db) throws IOException {
         super("Client-" + cleintsNb);
+        this.db = db;
         this.socket = socket;
         this.dis = new DataInputStream(socket.getInputStream());
         this.dos = new DataOutputStream(socket.getOutputStream());
-        dos.writeUTF("Connected to server. Hello!");
+        dos.writeUTF("Hello, pick your Nickname pleasse!");
     }
 
     @Override
     public void run(){
         System.out.println("Client connected.");
         String str = "";
-        while (!str.equals("exit")){
+        String selfName = "";
+
+        //picking nickname
+        while (true){
             try {
-                str = this.dis.readUTF();
+                str = dis.readUTF();
+                System.out.println("Client wrote: " +str + " from " + Thread.currentThread().getName());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (db.getNameBase().contains(str)){
+                try {
+                    dos.writeUTF("Name already used, please pick other.");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            else {
+                try {
+                    db.addName(str);
+                    selfName = str;
+                    dos.writeUTF("run");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                break;
+            }
+        }
+
+        try {
+            dos.writeUTF(db.getChat(nbOfMsg));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        while (!str.equals("/exit")){
+            try {
+                str = dis.readUTF();
             } catch (Exception e) {
                 try {
                     socket.close();
@@ -58,19 +102,23 @@ class Cloent extends Thread{
                 }
                 e.printStackTrace();
             }
-            if (!str.equals("exit")) {
-                System.out.println("Client wrote: " +str + " from " + Thread.currentThread().getName());
-            }
-            try {
-                System.out.println("Send to client: " + "You wrote " + getWordsCount(str) + " word(s).");
-                dos.writeUTF("You wrote " + getWordsCount(str) + " word(s).");
-            } catch (Exception e) {
-                e.printStackTrace();
+            if (!str.equals("/exit")) {
+                db.addMessage(selfName + ": " + str);
+                System.out.println("Client wrote: " + str + " from " + Thread.currentThread().getName());
+                try {
+                    //sending
+                    for (Cloent a : db.getClients()) {
+                        a.sendMsg(selfName + ": " + str);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             count += getWordsCount(str);
         }
         try {
             Thread.sleep(1000);
+            db.getClients().remove(this);
             socket.close();
             System.out.println("Client disconnected.");
         } catch (IOException | InterruptedException e) {
@@ -81,19 +129,51 @@ class Cloent extends Thread{
     private int getWordsCount(String str){
         return str.split("\\s+").length;
     }
+
+    private void sendMsg(String msg) throws IOException {
+        dos.writeUTF(msg);
+    }
 }
 
+class DataBase implements Serializable {
+    private ArrayList<String> nameBase;
+    private ArrayList<String> messages;
+    private ArrayList<Cloent> clients;
 
-/*
-    String[] allStr = str.split("\\s+");
-            if (allStr[1].equals("joined") || allStr[1].equals("left") || allStr[1].equals("disconnected") || allStr[1].equals("connected")){
-                    continue;
-                    }
-                    if (allStr[1].equals("sent")){
-                    allStr[1] = ":";
-                    System.out.print(allStr[0]);
-                    for (int i = 1; i < allStr.length; i++){
-        System.out.print(allStr[i] + " ");
+    DataBase(){
+        nameBase = new ArrayList<>();
+        messages = new ArrayList<>();
+        clients = new ArrayList<>();
+        messages.add("Hello from the server!");
+    }
+
+    synchronized void addName(String nameBase) {
+        this.nameBase.add(nameBase);
+    }
+
+    synchronized ArrayList getNameBase(){
+        return nameBase;
+    }
+
+    synchronized String getChat(int nb){
+        StringBuilder str = new StringBuilder();
+        if (nb > messages.size())
+            nb = messages.size();
+        for (int i = 0; i < nb; i++){
+            str.append(messages.get(messages.size() - (nb - i))).append("\n");
         }
-        System.out.println("");
-        }*/
+        return str.toString();
+    }
+
+    synchronized void addMessage(String st){
+        messages.add(st);
+    }
+
+    synchronized ArrayList<Cloent> getClients() {
+        return clients;
+    }
+
+    synchronized void addClient(Cloent client){
+        this.clients.add(client);
+    }
+}
