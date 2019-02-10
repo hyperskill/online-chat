@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class Client {
 
@@ -18,11 +19,26 @@ public class Client {
                 DataInputStream inputStream = new DataInputStream(socket.getInputStream());
                 DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream())
         ) {
-
-            outputStream.writeUTF("Hello from client");
+            Scanner scanner = new Scanner(System.in);
             System.out.println(inputStream.readUTF());
-            socket.close();
 
+            while (true) {
+                System.out.print("Type message: ");
+                String message = scanner.nextLine();
+
+                if ("".equals(message.replaceAll("\\s+", ""))) {
+                    continue;
+                } else {
+                    outputStream.writeUTF(message);
+                }
+
+                if ("exit".equals(message)) {
+                    break;
+                }
+
+                System.out.println(inputStream.readUTF());
+
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

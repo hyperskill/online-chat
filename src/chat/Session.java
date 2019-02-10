@@ -8,6 +8,7 @@ import java.net.Socket;
 public class Session extends Thread {
 
     private final Socket socket;
+    private int wordsCount = 0;
 
     public Session(Socket socket) {
         this.socket = socket;
@@ -19,14 +20,37 @@ public class Session extends Thread {
                 DataInputStream inputStream = new DataInputStream(socket.getInputStream());
                 DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
         ) {
-            String msg = inputStream.readUTF();
+            System.out.println("Client connected.");
+            outputStream.writeUTF("Hello from server");
 
-            if (!"".equals(msg) && msg != null && !msg.isEmpty()) {
-                System.out.println(msg);
-                outputStream.writeUTF("Hello from server");
+            while (true) {
+                String message = inputStream.readUTF();
+
+                if ("exit".equals(message)) {
+                    System.out.println("Client typed: " + message);
+                    System.out.println("Client disconnected.");
+                    break;
+                }
+
+                if (!"".equals(message) && message != null && !message.isEmpty()) {
+                    System.out.println("Client typed: " + message);
+
+                    message = countWordsInUserInput(message);
+                    System.out.println("Sent to client: " + message);
+                    outputStream.writeUTF(message);
+                }
             }
+            socket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+    private String countWordsInUserInput(String message) {
+        String[] words = message.trim().split("\\s+");
+        wordsCount += words.length;
+        return String.format("You send %d words total", wordsCount);
+    }
+
+
 }
